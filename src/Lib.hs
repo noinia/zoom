@@ -64,63 +64,58 @@ circle = Blaze.Parent "circle" "<circle" "</circle>"
 
 vectorEffect = Blaze.attribute "vector-effect" " vector-effect=\""
 
+renderTime t = "global.begin+" <> toValue t <> "s"
+
 -- prdocues a def and the animation
-render :: ToValue r => Disk p r :+ RenderedDiskData r -> (Svg, Svg)
-render (Disk (c :+ _) r :+ x) = (def,use')
+render :: (ToValue r, Num r) => Disk p r :+ RenderedDiskData r -> Svg
+render (Disk (c :+ _) r :+ x) = circle
+                                ! A.cx           "0"
+                                ! A.cy           "0"
+                                ! A.r            (toValue $ r)
+                                ! A.transform    translate'
+                                ! vectorEffect   "non-scaling-stroke"
+                                ! A.opacity      "0"
+                                -- apply the custom effects:
+                                ! (mconcat $ x^.diskData.attrs)
+                                $ mconcat [ appear
+                                          , animation
+                                          , dissapear
+                                          ]
   where
-    def = circle
-          ! A.id_          (toValue $ x^.diskData.diskId)
-          ! A.cx           "0"
-          ! A.cy           "0"
-          ! A.r            (toValue $ r)
-          ! vectorEffect   "non-scaling-stroke"
-          ! A.opacity      "0"
-          -- apply the custom effects:
-          ! (mconcat $ x^.diskData.attrs)
-          $ appear <> dissapear
+    (TimeInterval s t) = x^.visibleInterval
 
     appear    = Svg.animate
-                 ! A.dur           "0.1s"
+                 ! A.dur           "0.01s"
                  ! A.attributename "opacity"
                  ! A.from           "0"
                  ! A.to             "1"
-                 ! A.begin          (toValue s)
-                 ! A.repeatcount    "0"
+                 ! A.begin          (renderTime s)
                  ! A.fill           "freeze"
     dissapear = Svg.animate
-                 ! A.dur           "0.1s"
+                 ! A.dur           "0.01s"
                  ! A.attributename "opacity"
                  ! A.from          "1"
                  ! A.to            "0"
-                 ! A.begin         (toValue t)
-                 ! A.repeatcount   "0"
+                 ! A.begin         (renderTime t)
                  ! A.fill          "freeze"
 
-
-
-    use' = use
-           ! A.xlinkHref ("#" <> (toValue $ x^.diskData.diskId))
-           ! A.transform (mconcat [ "translate("
-                                  , toValue $ c^.xCoord
-                                  , " "
-                                  , toValue $ c^.yCoord
-                                  , ")"
-                                  ])
-           $ animation
-
-    (TimeInterval s t) = x^.visibleInterval
+    translate' = mconcat [ "translate("
+                         , toValue $ c^.xCoord
+                         , " "
+                         , toValue $ c^.yCoord
+                         , ")"
+                         ]
 
     animation = Svg.animatetransform
                 ! A.attributename   "transform"
-                ! A.id_             (toValue $ x^.diskData.diskId.to animId)
+                ! A.begin           (renderTime s)
+                -- ! A.id_             (toValue $ x^.diskData.diskId.to animId)
                 ! A.type_           "scale"
                 ! A.additive        "sum"
-                ! A.from            (toValue s)
-                ! A.to              (toValue t)
+                ! A.from            "0"
+                ! A.to              "1"
                 ! A.dur             "10s"
-                ! A.repeatcount     "1"
-
-
+                ! A.fill            "freeze"
 
 instance ToValue Rational where
   toValue = toValue . realToFrac @Rational @Double
@@ -137,17 +132,35 @@ instance ToValue r => ToValue (Top r) where
 
 backgroundColor = "palegoldenrod"
 
+
 renderAll disks = Svg.docTypeSvg ! A.width "100%"
                                  ! A.height "600px"
                   $ do
                     Svg.rect ! A.width "100%"
                              ! A.height "100%"
                              ! A.fill backgroundColor
-                    Svg.defs (mconcat defs)
-                    (mconcat uses)
+                    global
+                    mconcat (map render $ disks)
   where
-    (defs,uses) = unzip . map render $ disks
+    duration = 11 :: Int -- in secionds
 
+    global = Svg.svg $ Svg.animate ! A.id_            "global"
+                                   ! A.begin          "0;global.end"
+                                   ! A.dur            (toValue duration <> "s")
+                                   ! A.attributename  "visibility"
+                                   ! A.from           "hide"
+                                   ! A.to             "hide"
+
+
+-- <rect>
+--     <animate id="o1" begin="0;o1.end" dur="10s"
+--     attributeName="visibility" from="hide" to="hide"/>
+--   </rect>
+
+
+
+-- test = Svg.circle ! A.cx "0" $ do
+--          Svg.rect ! A.x "0"
 
 
 main = B.writeFile "/tmp/out.svg" . renderMarkup . renderAll $ myRenderedDisks
