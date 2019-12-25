@@ -46,13 +46,16 @@ instance Semigroup DiskData where
 sq x = x*x
 
 myDisks :: [Disk () Double :+ DiskData]
-myDisks = [ Disk (ext $ Point2 100 100) (sq 1) :+ (DD 1 attrs)
-          , Disk (ext $ Point2 200 200) (sq 1) :+ (DD 2 attrs)
-          , Disk (ext $ Point2 500 250) (sq 2) :+ (DD 2 attrs)
-          , Disk (ext $ Point2 700 500) (sq 1.5) :+ (DD 2 attrs)
-          , Disk (ext $ Point2 600 560) (sq 4) :+ (DD 2 attrs)
-          , Disk (ext $ Point2 1000 250) (sq 5) :+ (DD 2 attrs)
-          , Disk (ext $ Point2 1400 540) (sq 1.5) :+ (DD 2 attrs)
+myDisks = [ Disk (ext $ Point2 100 70) (sq 1) :+ (DD 1 attrs)
+          , Disk (ext $ Point2 200 170) (sq 1) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 500 220) (sq 2) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 700 470) (sq 1.5) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 600 430) (sq 4) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 1100 190) (sq 5) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 1440 450) (sq 1.5) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 1300 30) (sq 2.1) :+ (DD 2 attrs)
+          , Disk (ext $ Point2 110 430) (sq 0.3) :+ (DD 2 attrs)
+          -- , Disk (ext $ Point2 680 60) (sq 0.4) :+ (DD 2 attrs)
           ]
   where
     attrs = [ A.stroke "rgb(228,26,28)"
@@ -151,15 +154,6 @@ render (Disk (c :+ _) r :+ x) = circle
                 ! A.fill            "freeze"
 
 
-    -- animation = Svg.animate
-    --              ! A.dur           (renderInterval ti <> "s")
-    --              ! A.attributename "r"
-    --              ! A.from          (toValue $ r * s')
-    --              ! A.to            (toValue $ r * t')
-    --              ! A.begin         (renderTime t)
-    --              ! A.fill          "freeze"
-
-
 renderInterval                    :: (Fractional r, ToValue r)
                                   => TimeInterval r -> Svg.AttributeValue
 renderInterval (TimeInterval s t) = timeValue (t' - s') <> "s"
@@ -181,11 +175,13 @@ instance (ToValue r, Num r) => ToValue (Top r) where
   toValue Top      = timeValue maxDuration
 
 
-backgroundColor = "palegoldenrod"
+backgroundColor = "hsl(0, 0%, 93%)"
+
+  -- "palegoldenrod"
 
 
 renderAll disks = Svg.docTypeSvg ! A.width "100%"
-                                 ! A.height "600px"
+                                 ! A.height "500px"
                   $ do
                     Svg.rect ! A.width "100%"
                              ! A.height "100%"
@@ -212,7 +208,7 @@ renderAll disks = Svg.docTypeSvg ! A.width "100%"
 --          Svg.rect ! A.x "0"
 
 
-main = B.writeFile "/tmp/out.svg" . renderMarkup . renderAll $ myRenderedDisks
+main = B.writeFile "/home/frank/workspace/fstaals_net/figures/hero.svg" . renderMarkup . renderAll $ myRenderedDisks
 
 myRenderedDisks = let ds = zoomingTimes myDisks
                   in map (&extra %~ uncurry RD) $ ds
@@ -296,3 +292,8 @@ intersectAt t p q = let rad d = t * d^.core.radius in
 
 maxDuration :: Double
 maxDuration = 20 + lastTime myRenderedDisks
+
+
+
+color s = let [r,g,b] = ((*256) . read @Double) <$> words s
+          in "rgb(" <> show r <> ", " <> show g <> ", " <> show b <> ")"
