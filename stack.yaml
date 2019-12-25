@@ -30,13 +30,15 @@ resolver: lts-14.7
 #   - wai
 packages:
 - .
+- '/home/frank/workspace/hgeometry/hgeometry'
+- '/home/frank/workspace/hgeometry/hgeometry-combinatorial'
 # Dependency packages to be pulled from upstream that are not in the resolver.
 # These entries can reference officially published versions as well as
 # forks / in-progress versions pinned to a git hash. For example:
 #
 extra-deps:
-- hgeometry-0.9.0.0@sha256:43043574d2ce39c543dfadb629ab3a41fe65d7bf68a1426d8d01312818bc6e4e,9702
-- hgeometry-combinatorial-0.9.0.0@sha256:a03b48302d8c542ff2ff90ba5d45f2742cc21ed1a676c8fa4870cd461a273354,7367
+# - hgeometry-0.9.0.0@sha256:43043574d2ce39c543dfadb629ab3a41fe65d7bf68a1426d8d01312818bc6e4e,9702
+# - hgeometry-combinatorial-0.9.0.0@sha256:a03b48302d8c542ff2ff90ba5d45f2742cc21ed1a676c8fa4870cd461a273354,7367
 
 # - acme-missiles-0.3
 # - git: https://github.com/commercialhaskell/stack.git
