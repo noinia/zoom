@@ -27,14 +27,15 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+                  Lib
+                  Algorithms.Geometry.WeightedClosestPair.Naive
   other-modules:
       Paths_zoom
   hs-source-dirs:
       src
   build-depends:
                 base >=4.7 && <5
-              , hgeometry >= 0.9.0.0
+              , hgeometry >= 0.10.0.0
               , hgeometry-combinatorial >= 0.9.0.0
               , blaze-svg
               , blaze-markup

@@ -175,7 +175,8 @@ instance (ToValue r, Num r) => ToValue (Top r) where
   toValue Top      = timeValue maxDuration
 
 
-backgroundColor = "hsl(0, 0%, 93%)"
+backgroundColor = "hsl(0, 0%, 48%)" --"rgb(72.192, 142.592, 0.0)"
+  --
 
   -- "palegoldenrod"
 
@@ -186,6 +187,7 @@ renderAll disks = Svg.docTypeSvg ! A.width "100%"
                     Svg.rect ! A.width "100%"
                              ! A.height "100%"
                              ! A.fill backgroundColor
+                             ! A.opacity "10%"
                     global
                     mconcat (map render $ disks)
   where
@@ -291,7 +293,7 @@ intersectAt t p q = let rad d = t * d^.core.radius in
 
 
 maxDuration :: Double
-maxDuration = 20 + lastTime myRenderedDisks
+maxDuration = 10 + lastTime myRenderedDisks
 
 
 
